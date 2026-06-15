@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Windows EXIT Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 480px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #1f6feb, #388bfd);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+    }
+
+    .header h1 { font-size: 22px; font-weight: 600; color: #e6edf3; }
+    .header p  { font-size: 13px; color: #7d8590; margin-top: 2px; }
+
+    .status-bar {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #7d8590;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #3fb950;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px 12px;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      background: #21262d;
+      color: #e6edf3;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn i { font-size: 22px; }
+
+    .btn:hover {
+      border-color: #388bfd;
+      background: #1f2c3d;
+      transform: translateY(-1px);
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn.shutdown  i { color: #f85149; }
+    .btn.restart   i { color: #ffa657; }
+    .btn.sleep     i { color: #79c0ff; }
+    .btn.lock      i { color: #d2a8ff; }
+    .btn.logoff    i { color: #56d364; }
+    .btn.hibernate i { color: #e3b341; }
+
+    .btn.shutdown:hover  { border-color: #f85149; background: #2d1b1e; }
+    .btn.restart:hover   { border-color: #ffa657; background: #2d221b; }
+    .btn.sleep:hover     { border-color: #79c0ff; background: #1b242d; }
+    .btn.lock:hover      { border-color: #d2a8ff; background: #261b2d; }
+    .btn.logoff:hover    { border-color: #56d364; background: #1b2d1e; }
+    .btn.hibernate:hover { border-color: #e3b341; background: #2d261b; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #21262d;
+      margin: 4px 0 20px;
+    }
+
+    .timer-section {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .timer-section label {
+      font-size: 12px;
+      color: #7d8590;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .timer-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .timer-row input {
+      flex: 1;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #e6edf3;
+      font-size: 14px;
+    }
+
+    .timer-row input:focus {
+      outline: none;
+      border-color: #388bfd;
+    }
+
+    .timer-row button {
+      padding: 8px 16px;
+      background: #1f6feb;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .timer-row button:hover { background: #388bfd; }
+
+    .cancel-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      color: #f85149;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .cancel-btn:hover {
+      background: #2d1b1e;
+      border-color: #f85149;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #e6edf3;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      max-width: 300px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 999;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast i { font-size: 16px; }
+    .toast.success i { color: #56d364; }
+    .toast.error   i { color: #f85149; }
+    .toast.info    i { color: #79c0ff; }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #484f58;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-icon"><i class="fa-brands fa-windows"></i></div>
+    <div>
+      <h1>Windows EXIT Tool</h1>
+      <p>System power management</p>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="dot"></div>
+    <span id="status-text">System ready — choose an action</span>
+  </div>
+
+  <div class="grid">
+    <button class="btn shutdown" onclick="action('shutdown')">
+      <i class="fa-solid fa-power-off"></i> Shut Down
+    </button>
+    <button class="btn restart" onclick="action('restart')">
+      <i class="fa-solid fa-rotate-right"></i> Restart
+    </button>
+    <button class="btn sleep" onclick="action('sleep')">
+      <i class="fa-solid fa-moon"></i> Sleep
+    </button>
+    <button class="btn lock" onclick="action('lock')">
+      <i class="fa-solid fa-lock"></i> Lock
+    </button>
+    <button class="btn logoff" onclick="action('logoff')">
+      <i class="fa-solid fa-right-from-bracket"></i> Log Off
+    </button>
+    <button class="btn hibernate" onclick="action('hibernate')">
+      <i class="fa-solid fa-snowflake"></i> Hibernate
+    </button>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="timer-section">
+    <label><i class="fa-regular fa-clock"></i> &nbsp;Scheduled shutdown (minutes)</label>
+    <div class="timer-row">
+      <input type="number" id="timer-input" placeholder="e.g. 30" min="1" max="1440"/>
+      <button onclick="scheduleShutdown()">Schedule</button>
+    </div>
+    <button class="cancel-btn" onclick="cancelScheduled()">
+      <i class="fa-solid fa-xmark"></i> &nbsp;Cancel Scheduled Shutdown
+    </button>
+  </div>
+
+  <div class="footer">Actions require administrator privileges on Windows</div>
+</div>
+
+<div class="toast" id="toast">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="toast-msg">Done</span>
+</div>
+
+<script>
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    const icon = t.querySelector('i');
+    icon.className = `fa-solid ${type==='success'?'fa-circle-check':type==='error'?'fa-circle-xmark':'fa-circle-info'}`;
+    t.className = `toast ${type}`;
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function setStatus(text) {
+    document.getElementById('status-text').textContent = text;
+  }
+
+  function action(type) {
+    const labels = {
+      shutdown: 'Shutting down...', restart: 'Restarting...',
+      sleep: 'Going to sleep...', lock: 'Locking screen...',
+      logoff: 'Logging off...', hibernate: 'Hibernating...'
+    };
+    setStatus(labels[type]);
+    fetch('/action', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: type})
+    })
+    .then(r => r.json())
+    .then(d => {
+      showToast(d.message, d.status === 'ok' ? 'success' : 'error');
+      if (d.status !== 'ok') setStatus('System ready — choose an action');
+    })
+    .catch(() => {
+      showToast('Could not connect to server', 'error');
+      setStatus('System ready — choose an action');
+    });
+  }
+
+  function scheduleShutdown() {
+    const mins = parseInt(document.getElementById('timer-input').value);
+    if (!mins || mins < 1) { showToast('Enter a valid number of minutes', 'error'); return; }
+    fetch('/schedule', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({minutes: mins})
+    })
+    .then(r => r.json())
+    .then(d => {
+      showToast(d.message, d.status === 'ok' ? 'info' : 'error');
+      if (d.status === 'ok') setStatus(`Shutdown scheduled in ${mins} min`);
+    })
+    .catch(() => showToast('Could not connect to server', 'error'));
+  }
+
+  function cancelScheduled() {
+    fetch('/cancel', {method: 'POST'})
+    .then(r => r.json())
+    .then(d => {
+      showToast(d.message, d.status === 'ok' ? 'success' : 'error');
+      setStatus('System ready — choose an action');
+    })
+    .catch(() => showToast('Could not connect to server', 'error'));
+  }
+</script>
+</body>
+</html>
